@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análise de Candidatos - Operador CNC Multifuncional</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #7f8c8d;
+            font-size: 1.2em;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-number {
+            font-size: 3em;
+            font-weight: bold;
+            color: #3498db;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 1.1em;
+        }
+        
+        .charts-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .chart-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .chart-title {
+            color: #2c3e50;
+            font-size: 1.4em;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .rankings-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .ranking-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .ranking-title {
+            color: #2c3e50;
+            font-size: 1.6em;
+            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        
+        .candidate-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            background: linear-gradient(90deg, #f8f9fa, #e9ecef);
+            border-radius: 10px;
+            border-left: 4px solid #3498db;
+            transition: all 0.3s ease;
+        }
+        
+        .candidate-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .candidate-info {
+            flex: 1;
+        }
+        
+        .candidate-name {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+        
+        .candidate-details {
+            color: #7f8c8d;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        
+        .candidate-score {
+            background: #3498db;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        
+        .top-3 .candidate-item:nth-child(1) { border-left-color: #f1c40f; }
+        .top-3 .candidate-item:nth-child(2) { border-left-color: #95a5a6; }
+        .top-3 .candidate-item:nth-child(3) { border-left-color: #cd7f32; }
+        
+        .recommendations {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .recommendations h2 {
+            color: #2c3e50;
+            font-size: 2em;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .recommendation-section {
+            margin: 20px 0;
+        }
+        
+        .recommendation-title {
+            color: #e74c3c;
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .recommendation-list {
+            list-style: none;
+            padding-left: 20px;
+        }
+        
+        .recommendation-list li {
+            margin: 8px 0;
+            padding: 10px;
+            background: #ecf0f1;
+            border-radius: 5px;
+            border-left: 3px solid #3498db;
+        }
+        
+        .highlight {
+            background: linear-gradient(120deg, #a8edea 0%, #fed6e3 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #e74c3c;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9em;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .charts-section,
+            .rankings-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .candidate-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Análise de Candidatos</h1>
+            <p>Operador CNC Multifuncional - Preparador de Torno CNC</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">63</div>
+                <div class="stat-label">Total de Candidatos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">40.4</div>
+                <div class="stat-label">Idade Média (anos)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">17.9</div>
+                <div class="stat-label">Experiência Média (anos)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">95%</div>
+                <div class="stat-label">Com Formação SENAI</div>
+            </div>
+        </div>
+
+        <div class="charts-section">
+            <div class="chart-container">
+                <h3 class="chart-title">Distribuição por Faixa Etária</h3>
+                <canvas id="ageChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3 class="chart-title">Distribuição Geográfica</h3>
+                <canvas id="locationChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3 class="chart-title">Competências Técnicas</h3>
+                <canvas id="skillsChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3 class="chart-title">Nível de Formação</h3>
+                <canvas id="educationChart"></canvas>
+            </div>
+        </div>
+
+        <div class="rankings-section">
+            <div class="ranking-card">
+                <h3 class="ranking-title">🥇 TOP 5 - Operador CNC Multifuncional</h3>
+                <div class="top-3">
+                    <div class="candidate-item">
+                        <div class="candidate-info">
+                            <div class="candidate-name">Luis Henrique Fidelis Sanches</div>
+                            <div class="candidate-details">45 anos • Jundiaí • Eng. Mecânico + Six Sigma • 28 anos exp.</div>
+                        </div>
+                        <div class="candidate-score">96.2</div>
+                    </div>
+                    <div class="candidate-item">
+                        <div class="candidate-info">
+                            <div class="candidate-name">Marcos Vinicius da Silva</div>
+                            <div class="candidate-details">30 anos • Várzea Paulista • Eng. Mecânico • 15 anos exp.</div>
+                        </div>
+                        <div class="candidate-score">91.0</div>
+                    </div>
+                    <div class="candidate-item">
+                        <div class="candidate-info">
+                            <div class="candidate-name">Osea Dos Santos Bernardino</div>
+                            <div class="candidate-details">43 anos • Jundiaí • Técnico Mecatrônica + CAM • 23 anos exp.</div>
+                        </div>
+                        <div class="candidate-score">88.2</div>
+                    </div>
+                    <div class="candidate-item">
+                        <div class="candidate-info">
+                            <div class="candidate-name">Anderson Ferreira</div>
+                            <div class="candidate-details">45 anos • Itupeva • ETEC + MasterCAM • 23 anos exp.</div>
+                        </div>
+                        <div class="candidate-score">85.8</div>
+                    </div>
+                    <div class="candidate-item">
+                        <div class="candidate-info">
+                            <div class="candidate-name">Ednaldo Cavalcante</div>
+                            <div class="candidate-details">43 anos • Itatiba • Eng. Produção + CAM • 24 anos exp.</div>
+                        </div>
+                        <div class="candidate-score">84.6</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ranking-card">
+                <h3 class="ranking-title">🔧 TOP 5 - Preparador de Torno CNC</h3>
+                <div class="top-3">
+                    <div class="candidate-item">
+                        <div class="candidate-info">
+                            <div class="candidate-name">Ricardo Antonio Cardoso</div>
+                            <div class="candidate-details">44 anos • Jundiaí • Técnico Mecânica + Torno Vertical • 15 anos exp.</div>
+                        </div>
+                        <div class="candidate-score">89.5</div>
+                    </div>
+                    <div class="candidate-item">
+                        <div class="candidate-info">
+                            <div class="candidate-name">Marcelo de Almeida</div>
+                            <div class="candidate-details">46 anos • Jundiaí • CNC + Ferramentaria • 20 anos exp.</div>
+                        </div>
+                        <div class="candidate-score">85.0</div>
+                    </div>
+                    <div class="candidate-item">
+                        <div class="candidate-info">
+                            <div class="candidate-name">Francisco Pereira Barbosa</div>
+                            <div class="candidate-details">46 anos • Cajamar • Técnico Mecânico + SKF • 24 anos exp.</div>
+                        </div>
+                        <div class="candidate-score">82.0</div>
+                    </div>
+                    <div class="candidate-item">
+                        <div class="candidate-info">
+                            <div class="candidate-name">Adilson Sales Dantas</div>
+                            <div class="candidate-details">42 anos • Várzea Paulista • Multifuncional • 20 anos exp.</div>
+                        </div>
+                        <div class="candidate-score">78.0</div>
+                    </div>
+                    <div class="candidate-item">
+                        <div class="candidate-info">
+                            <div class="candidate-name">Luis Antônio Ferreira Lopes</div>
+                            <div class="candidate-details">53 anos • Campo Limpo Paulista • Multi Processos • 11 anos exp.</div>
+                        </div>
+                        <div class="candidate-score">75.5</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ranking-card">
+                <h3 class="ranking-title">⚙️ Especialistas - Torno Vertical</h3>
+                <div class="candidate-item">
+                    <div class="candidate-info">
+                        <div class="candidate-name">Eder Anderson Theodoro de Campos ✅</div>
+                        <div class="candidate-details">42 anos • Várzea Paulista • Especialista Torno Vertical Grande Porte • 24 anos exp.</div>
+                    </div>
+                    <div class="candidate-score">EXPERT</div>
+                </div>
+                <div class="candidate-item">
+                    <div class="candidate-info">
+                        <div class="candidate-name">Marcelo Roberto Dias Pereira ✅</div>
+                        <div class="candidate-details">52 anos • Jundiaí • Torno Vertical CNC e Convencional • 29 anos exp.</div>
+                    </div>
+                    <div class="candidate-score">EXPERT</div>
+                </div>
+                <div class="candidate-item">
+                    <div class="candidate-info">
+                        <div class="candidate-name">Osea Dos Santos Bernardino ✅</div>
+                        <div class="candidate-details">43 anos • Jundiaí • Rolamentos Eólicos + Programação • 23 anos exp.</div>
+                    </div>
+                    <div class="candidate-score">EXPERT</div>
+                </div>
+                <div class="candidate-item">
+                    <div class="candidate-info">
+                        <div class="candidate-name">Ricardo Antonio Cardoso ✅</div>
+                        <div class="candidate-details">44 anos • Jundiaí • Tornos Verticais SKF • 15 anos exp.</div>
+                    </div>
+                    <div class="candidate-score">SENIOR</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="recommendations">
+            <h2>🎯 Recomendações Estratégicas</h2>
+            
+            <div class="highlight">
+                <h3>💎 CONTRATAÇÃO PRIORITÁRIA IMEDIATA</h3>
+                <ul class="recommendation-list">
+                    <li><strong>Luis Henrique Fidelis Sanches</strong> - Engenheiro Mecânico + Master Black Belt Six Sigma + 28 anos experiência</li>
+                    <li><strong>Marcos Vinicius da Silva</strong> - Engenheiro Mecânico + Analista de Preset + 15 anos experiência</li>
+                    <li><strong>Eder Anderson Theodoro de Campos</strong> - Especialista em Torno Vertical de Grande Porte + 24 anos experiência</li>
+                </ul>
+            </div>
+
+            <div class="recommendation-section">
+                <div class="recommendation-title">🥈 POOL DE RESERVA QUALIFICADO</div>
+                <ul class="recommendation-list">
+                    <li>Marcelo Roberto Dias Pereira - 29 anos experiência + Torno Vertical</li>
+                    <li>Osea Dos Santos Bernardino - Programação CAM + Solidworks + Mastercam</li>
+                    <li>Anderson Ferreira - Programador CNC especialista + MasterCAM</li>
+                    <li>Ricardo Antonio Cardoso - Preparador de Torno CNC especializado</li>
+                </ul>
+            </div>
+
+            <div class="recommendation-section">
+                <div class="recommendation-title">📊 DADOS ESTRATÉGICOS</div>
+                <ul class="recommendation-list">
+                    <li>10 candidatos têm 20+ anos de experiência (Seniores)</li>
+                    <li>11 candidatos são multifuncionais (Versatilidade)</li>
+                    <li>4 candidatos especialistas em Torno Vertical</li>
+                    <li>95% residem em raio de 25km (Logística favorável)</li>
+                    <li>100% têm experiência com CNC</li>
+                    <li>20% têm formação superior</li>
+                </ul>
+            </div>
+
+            <div class="recommendation-section">
+                <div class="recommendation-title">🌍 CONCENTRAÇÃO GEOGRÁFICA</div>
+                <ul class="recommendation-list">
+                    <li>Jundiaí: 8 candidatos (centro de operações)</li>
+                    <li>Várzea Paulista: 6 candidatos (~15km)</li>
+                    <li>Campo Limpo Paulista: 3 candidatos (~10km)</li>
+                    <li>Outras cidades: 3 candidatos (~20-25km)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>📅 Análise gerada em maio de 2025 • Base: 63 currículos analisados • 🎯 Foco: Operador CNC Multifuncional</p>
+            <p>© Copyright 2025 • Desenvolvido por <strong>Rogerinho Ramos</strong></p>
+        </div>
+    </div>
+
+    <script>
+        // Configuração dos gráficos
+        Chart.defaults.font.family = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+        Chart.defaults.color = '#666';
+
+        // Gráfico de Faixa Etária
+        const ageCtx = document.getElementById('ageChart').getContext('2d');
+        new Chart(ageCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['20-30 anos', '31-40 anos', '41-50 anos', '51+ anos'],
+                datasets: [{
+                    data: [4, 6, 8, 2],
+                    backgroundColor: ['#3498db', '#2ecc71', '#f39c12', '#e74c3c'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true
+                        }
+                    }
+                }
+            }
+        });
+
+        // Gráfico de Localização
+        const locationCtx = document.getElementById('locationChart').getContext('2d');
+        new Chart(locationCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Jundiaí', 'Várzea Paulista', 'Campo Limpo Pta', 'Outras'],
+                datasets: [{
+                    label: 'Candidatos por Cidade',
+                    data: [8, 6, 3, 3],
+                    backgroundColor: ['#3498db', '#2ecc71', '#f39c12', '#e74c3c'],
+                    borderRadius: 8,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0,0,0,0.1)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+
+        // Gráfico de Competências
+        const skillsCtx = document.getElementById('skillsChart').getContext('2d');
+        new Chart(skillsCtx, {
+            type: 'radar',
+            data: {
+                labels: ['CNC', 'Torno', 'Centro Usinagem', 'Multifuncional', 'Torno Vertical'],
+                datasets: [{
+                    label: 'Candidatos com Competência',
+                    data: [20, 17, 12, 11, 4],
+                    backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                    borderColor: '#3498db',
+                    borderWidth: 2,
+                    pointBackgroundColor: '#3498db'
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        max: 20,
+                        grid: {
+                            color: 'rgba(0,0,0,0.1)'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+
+        // Gráfico de Formação
+        const educationCtx = document.getElementById('educationChart').getContext('2d');
+        new Chart(educationCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Ensino Médio', 'Técnico', 'Superior'],
+                datasets: [{
+                    data: [13, 3, 4],
+                    backgroundColor: ['#95a5a6', '#f39c12', '#2ecc71'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
